@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  app:
+    build:
+      context: docker
+      dockerfile: app/app.dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./laravel:/var/www/html:cached
+      - ~/.composer/cache:/var/www/.composer/cache/:delegated
+    ports:
+      - 80:80
+    environment:
+      PHP_IDE_CONFIG: "serverName=docker"
+
+  db:
+    image: mysql:5.7
+    volumes:
+      # Use named volume for db data, so that it can persist. 
+      # (Clear with `docker-compose down -v`)
+      - dbdata:/var/lib/mysql:delegated
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=laraveldockerroot
+      - MYSQL_DATABASE=laravel
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=laravel
+
+  mailhog:
+    image: mailhog/mailhog
+    user: root
+    ports:
+      - 1025:1025
+      - 8025:8025
+
+volumes:
+  dbdata:
